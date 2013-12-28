@@ -18,6 +18,7 @@
  */
 
 namespace Foomo\Sass;
+use Foomo\Modules\MakeResult;
 
 /**
  * @link www.foomo.org
@@ -75,4 +76,24 @@ class Module extends \Foomo\Modules\ModuleBase
 			// \Foomo\Modules\Resource\Config::getResource('yourModule', 'db')
 		);
 	}
+	public static function make($target, MakeResult $result)
+	{
+		switch($target) {
+			case 'clean':
+				$result->addEntry('cleaning css files and source maps in ' . self::getHtdocsVarDir());
+				foreach(new \DirectoryIterator(self::getHtdocsVarDir()) as $fileInfo) {
+					if($fileInfo->isFile() && in_array(substr($fileInfo->getFilename(), -4), array('.css', '.map'))) {
+						if(unlink($fileInfo->getPathname())) {
+							$result->addEntry('removed ' . $fileInfo->getFilename());
+						} else {
+							$result->addEntry('could not remove ' . $fileInfo->getFilename(), MakeResult\Entry::LEVEL_ERROR, false);
+						}
+					}
+				}
+				break;
+			default:
+				parent::make($target, $result);
+		}
+	}
+
 }

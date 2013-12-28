@@ -135,8 +135,8 @@ class Sass
 		$compile = (!\file_exists($output));
 
 		if (!$compile && $this->watch) {
-			$deps = \Foomo\Sass\Utils::getDependencies($source);
-			$cmd = \Foomo\CliCall\Find::create($deps)->type('f')->newer($output)->execute();
+			$dependencies = \Foomo\Sass\Utils::getDependencies($source);
+			$cmd = \Foomo\CliCall\Find::create($dependencies)->type('f')->newer($output)->execute();
 			if (!empty($cmd->stdOut)) $compile = true;
 		}
 		return $compile;
@@ -153,7 +153,31 @@ class Sass
 			Lock::lock($lockName = 'SASS-' . basename($output)) &&
 			$this->needsCompilation()
 		) {
-			$call = $this->sourceMapsCompile();
+
+			$arguments = array(
+				$this->filename,
+				'-o',
+				$this->getOutputFilename(),
+				'-t'
+
+			);
+			if($this->compress) {
+				$arguments[] = 'compressed';
+			} else {
+				$arguments[] = 'nested';
+				// source maps
+				$arguments[] = '-g';
+			}
+			$call = \Foomo\CliCall::create(
+				Sass\Module::getBaseDir('bin') . DIRECTORY_SEPARATOR . 'sassc',
+				$arguments
+			)
+				->execute()
+			;
+			if($call->exitStatus === 0 && !$this->compress) {
+				Sass\SourceServer::fixSourcemap($this->getOutputFilename(), Sass\Module::NAME);
+			}
+
 			$success = $call->exitStatus == 0;
 			if(!$success) {
 				MVC::abort();
@@ -178,39 +202,6 @@ class Sass
 	public static function create($filename)
 	{
 		return new self($filename);
-	}
-
-	//---------------------------------------------------------------------------------------------
-	// Private static methods
-	//---------------------------------------------------------------------------------------------
-
-	private function sourceMapsCompile()
-	{
-		$css = $this->getOutputFilename();
-		$arguments = array(
-			$this->filename,
-			'-o',
-			$css,
-			'-t'
-
-		);
-		if($this->compress) {
-			$arguments[] = 'compressed';
-		} else {
-			$arguments[] = 'nested';
-			// source maps
-			$arguments[] = '-g';
-		}
-		$cmd = \Foomo\CliCall::create(
-				Sass\Module::getBaseDir('bin') . DIRECTORY_SEPARATOR . 'sassc',
-				$arguments
-			)
-			->execute()
-		;
-		if($cmd->exitStatus === 0 && !$this->compress) {
-			Sass\SourceServer::fixSourcemap($this->getOutputFilename(), Sass\Module::NAME);
-		}
-		return $cmd;
 	}
 
 }
