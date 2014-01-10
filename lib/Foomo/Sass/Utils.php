@@ -107,6 +107,10 @@ class Utils
 				if (file_exists($resolvedFilename) && is_file($resolvedFilename)) {
 					return $resolvedFilename;
 				}
+				$resolvedFilename = dirname($resolvedFilename) . DIRECTORY_SEPARATOR . '_' . basename($resolvedFilename);
+				if (file_exists($resolvedFilename) && is_file($resolvedFilename)) {
+					return $resolvedFilename;
+				}
 			}
 		}
 	}
