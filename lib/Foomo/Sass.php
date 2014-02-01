@@ -156,9 +156,8 @@ class Sass
 
 			$arguments = array(
 				$this->filename,
-				'-o',
 				$this->getOutputFilename(),
-				'-t'
+				'--style'
 
 			);
 			if($this->compress) {
@@ -166,7 +165,7 @@ class Sass
 			} else {
 				$arguments[] = 'nested';
 				// source maps
-				$arguments[] = '-g';
+				$arguments[] = '--sourcemap';
 			}
 			$call = \Foomo\CliCall::create(
 				Sass\Module::getBaseDir('bin') . DIRECTORY_SEPARATOR . 'sassc',
