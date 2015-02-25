@@ -17,6 +17,8 @@
  */
 
 namespace Foomo\Sass;
+use Foomo\Timer;
+
 
 /**
  * @link www.foomo.org
@@ -67,17 +69,21 @@ class Utils
 	 */
 	private static function extractImports($filename)
 	{
-		$imports = array();
-		$matches = self::pregMatch($filename);
-		foreach ($matches[1] as $rawImport) {
-			$resolvedFilename = self::resolveFilename($filename, $rawImport);
-			if(!empty($resolvedFilename)) {
-				$imports[] = $resolvedFilename;
-			} else {
-				trigger_error('can not resolve import in ' . $filename . ' to ' . $rawImport . ' from statement ' . $rawImport);
-			}
-		}
-		return $imports;
+        static $cache = [];
+        if(!isset($cache[$filename])) {
+            $imports = array();
+            $matches = self::pregMatch($filename);
+            foreach ($matches[1] as $rawImport) {
+                $resolvedFilename = self::resolveFilename($filename, $rawImport);
+                if(!empty($resolvedFilename)) {
+                    $imports[] = $resolvedFilename;
+                } else {
+                    trigger_error('can not resolve import in ' . $filename . ' to ' . $rawImport . ' from statement ' . $rawImport);
+                }
+            }
+            $cache[$filename] = $imports;
+        }
+		return $cache[$filename];
 	}
 
 	/**
@@ -100,7 +106,9 @@ class Utils
 	 */
 	private static function resolveFilename($filename, $path)
 	{
-		if (substr($path, 0, 2) == './') $path = substr($path, 2);
+		if (substr($path, 0, 2) == './') {
+            $path = substr($path, 2);
+        }
 		foreach (array('', '.scss') as $suffix) {
 			foreach (self::getLookupRoots($filename) as $rootDir) {
 				$resolvedFilename = $rootDir . $path . $suffix;

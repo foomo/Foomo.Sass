@@ -131,13 +131,16 @@ class Sass
 	{
 		$source = $this->filename;
 		$output = $this->getOutputFilename();
-
 		$compile = (!\file_exists($output));
-
 		if (!$compile && $this->watch) {
 			$dependencies = \Foomo\Sass\Utils::getDependencies($source);
-			$cmd = \Foomo\CliCall\Find::create($dependencies)->type('f')->newer($output)->execute();
-			if (!empty($cmd->stdOut)) $compile = true;
+            $outputMTime = filemtime($output);
+            foreach($dependencies as $dep) {
+                if(file_exists($dep) && filemtime($dep) > $outputMTime) {
+                    $compile = true;
+                    break;
+                }
+            }
 		}
 		return $compile;
 	}
