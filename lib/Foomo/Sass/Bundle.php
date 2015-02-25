@@ -32,6 +32,10 @@ class Bundle extends \Foomo\Bundle\AbstractBundle
 	 * @var string
 	 */
 	private $sass;
+    public function getHash()
+    {
+        return parent::getHash() . sha1($this->sass);
+    }
 	/**
 	 * @param Result $result
 	 * @return Bundle
