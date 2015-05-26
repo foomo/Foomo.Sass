@@ -170,8 +170,18 @@ class Sass
 				// source maps
 				$arguments[] = '--sourcemap';
 			}
+			$executableFile = Sass\Module::getBaseDir('bin') . DIRECTORY_SEPARATOR . 'sassc';
+			switch($os = strtolower(PHP_OS)) {
+				case 'linux':
+				case 'darwin':
+					$executableFile .= '-' . $os;
+					break;
+				default:
+					$executableFile = 'sassc';
+
+			}
 			$call = \Foomo\CliCall::create(
-				Sass\Module::getBaseDir('bin') . DIRECTORY_SEPARATOR . 'sassc',
+				$executableFile,
 				$arguments
 			)
 				->execute()
