@@ -29,7 +29,7 @@ class Module extends \Foomo\Modules\ModuleBase
 	//---------------------------------------------------------------------------------------------
 	// ~ Constants
 	//---------------------------------------------------------------------------------------------
-	const VERSION = '0.1.4';
+	const VERSION = '0.1.5';
 	/**
 	 * the name of this module
 	 *
@@ -66,6 +66,8 @@ class Module extends \Foomo\Modules\ModuleBase
 	{
 		return array(
 			\Foomo\Modules\Resource\Module::getResource('Foomo.Bundle', '0.1.*'),
+			\Foomo\Modules\Resource\CliCommand::getResource('sass')
+
 			// get a run mode independent folder var/<runMode>/test
 			// \Foomo\Modules\Resource\Fs::getVarResource(\Foomo\Modules\Resource\Fs::TYPE_FOLDER, 'test'),
 			// and a file in it
